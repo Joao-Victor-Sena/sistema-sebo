@@ -1,0 +1,243 @@
+/* css/custom.css */
+
+/* css/custom.css */
+
+/* --- ESTILOS DA TELA DE LOGIN (Tema Dark & Orange) --- */
+.login-page {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* Camada de Fundo (Imagem + Blur) */
+.login-page::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('img/lello-background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    filter: blur(4px) brightness(0.6); /* Adicionei brightness para escurecer a foto */
+    transform: scale(1.05);
+    z-index: -1;
+}
+/* O Card agora é Escuro e FORÇA o texto branco */
+.card-login {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid #444;
+    border-radius: 15px;
+    padding: 2.5rem;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+    
+    /* CORREÇÃO AQUI: Força cor branca em tudo */
+    color: #ffffff !important; 
+    z-index: 1;
+}
+
+/* Garante que Títulos e Parágrafos sejam brancos */
+.card-login h1, 
+.card-login p, 
+.card-login label {
+    color: #ffffff !important;
+}
+
+/* Inputs Escuros (Onde você digita) */
+.card-login .form-control {
+    background-color: #222222 !important; /* Fundo bem escuro */
+    border: 1px solid #555;
+    color: #ffffff !important; /* Letra branca ao digitar */
+    padding: 12px;
+}
+
+/* Cor do texto de exemplo (placeholder) */
+.card-login .form-control::placeholder {
+    color: #888888 !important; /* Cinza claro */
+}
+
+/* Quando clica no input */
+.card-login .form-control:focus {
+    background-color: #222222 !important;
+    color: #ffffff !important;
+    border-color: #ff8c00;
+    box-shadow: 0 0 0 0.25rem rgba(255, 140, 0, 0.25);
+}
+
+/* Botão Laranja */
+.login-btn {
+    background-color: #ff8c00;
+    border: none;
+    color: #000; /* Texto preto para contraste alto */
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px;
+    transition: all 0.3s;
+}
+
+.login-btn:hover {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
+}
+
+/* Links */
+.card-login a {
+    color: #ff8c00;
+    text-decoration: none;
+}
+.card-login a:hover {
+    text-decoration: underline;
+    color: #e67e22;
+}
+
+/* --- TEMA DARK & ORANGE (SeboLinhas Style) --- */
+
+/* Procure onde diz "body" e ALTERE para isto: */
+body {
+    padding-top: 0; /* REMOVIDO os 70px antigos */
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Adicione este estilo para o botão de SAIR flutuante no dashboard */
+.btn-logout-floating {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+/* Cor de Contraste (Laranja) */
+.text-orange {
+    color: #ff8c00 !important;
+}
+
+.bg-orange {
+    background-color: #ff8c00 !important;
+    color: #000;
+}
+
+/* Navbar Dark Customizada */
+.navbar-dark.bg-dark {
+    background-color: #000 !important; /* Preto absoluto no topo */
+    border-bottom: 2px solid #ff8c00; /* Linha laranja sutil */
+}
+
+/* Cards do Menu Principal (O Croqui) */
+.card-menu {
+    background-color: #2c2c2c; /* Cinza médio */
+    border: 1px solid #444;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none; /* Remove sublinhado do link */
+    color: #fff;
+    height: 100%; /* Garante altura igual */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-menu:hover {
+    border-color: #ff8c00;
+    transform: translateY(-10px); /* O card sobe levemente */
+    box-shadow: 0 0 20px rgba(255, 140, 0, 0.3); /* Brilho laranja */
+}
+
+.card-menu i {
+    font-size: 4rem; /* Ícones grandes */
+    margin-bottom: 15px;
+    color: #ff8c00;
+}
+
+.card-menu:hover i {
+    color: #fff; /* Ícone fica branco no hover */
+}
+
+.card-menu h3 {
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Footer Fixo e Estiloso */
+.footer-custom {
+    background-color: #000;
+    border-top: 1px solid #333;
+    color: #777;
+    padding: 20px 0;
+    width: 100%;
+    /* Se quiser fixo no rodapé visualmente mesmo com pouco conteudo: */
+    margin-top: auto; 
+}
+
+/* --- PAGINAÇÃO CUSTOMIZADA (Dark & Orange) --- */
+.pagination .page-link {
+    background-color: #2c2c2c; /* Fundo cinza escuro */
+    border-color: #444;
+    color: #e0e0e0; /* Texto claro */
+}
+
+.pagination .page-link:hover {
+    background-color: #333;
+    color: #ff8c00; /* Texto laranja ao passar o mouse */
+    border-color: #ff8c00;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #ff8c00; /* Fundo laranja no ativo */
+    border-color: #ff8c00;
+    color: #000; /* Texto preto para contraste no laranja */
+    font-weight: bold;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #1a1a1a;
+    color: #666;
+    border-color: #333;
+}
+
+/* --- CORREÇÃO GLOBAL DE CAMPOS DE TEXTO --- */
+.form-control {
+    color: #ffffff !important; /* Texto digitado sempre branco */
+    background-color: #2c2c2c; /* Fundo cinza escuro padrão */
+    border: 1px solid #444;
+}
+
+.form-control:focus {
+    color: #ffffff !important;
+    background-color: #2c2c2c;
+    border-color: #ff8c00; /* Borda laranja ao clicar */
+    box-shadow: 0 0 0 0.25rem rgba(255, 140, 0, 0.25);
+}
+
+/* Cor do texto de ajuda (Placeholder) */
+.form-control::placeholder {
+    color: #bbbbbb !important; /* Cinza claro para ler fácil */
+    opacity: 1;
+}
+
+/* --- BOTÃO OUTLINE LARANJA PERSONALIZADO --- */
+.btn-outline-orange {
+    color: #ff8c00;
+    border-color: #ff8c00;
+    background-color: transparent;
+}
+
+.btn-outline-orange:hover {
+    background-color: #ff8c00;
+    color: #000000; /* Texto preto para contraste quando cheio */
+    border-color: #ff8c00;
+}

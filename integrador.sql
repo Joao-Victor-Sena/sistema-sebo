@@ -1,0 +1,93 @@
+-- SCRIPT DE CRIAÇÃO E POPULAÇÃO - SEBOLINHAS
+-- Desenvolvido para avaliação acadêmica
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+-- 1. CRIAÇÃO DO BANCO
+DROP DATABASE IF EXISTS Integrador;
+CREATE DATABASE Integrador CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE Integrador;
+
+-- 2. TABELAS
+
+-- Tabela de Clientes
+CREATE TABLE CLIENTE (
+    CD_CLIENTE INT AUTO_INCREMENT PRIMARY KEY,
+    NOME VARCHAR(100) NOT NULL,
+    TELEFONE VARCHAR(20) DEFAULT NULL,
+    CPF VARCHAR(14) NOT NULL,
+    EMAIL VARCHAR(100) NOT NULL,
+    CONSTRAINT U_CPF UNIQUE (CPF)
+) AUTO_INCREMENT=100;
+
+-- Tabela de Funcionários
+CREATE TABLE FUNCIONARIO (
+    CD_FUNCIONARIO INT AUTO_INCREMENT PRIMARY KEY,
+    NOME VARCHAR(100) NOT NULL,
+    CPF VARCHAR(14) NOT NULL,
+    FUNCAO VARCHAR(20) NOT NULL,
+    SENHA VARCHAR(255) NOT NULL DEFAULT '1234', -- Senha padrão
+    CONSTRAINT U_CPF_F UNIQUE (CPF)
+);
+
+-- Tabela de Livros
+CREATE TABLE LIVRO (
+    CD_LIVRO INT AUTO_INCREMENT PRIMARY KEY,
+    TITULO VARCHAR(150) NOT NULL,
+    ANO INT NOT NULL,
+    AUTOR VARCHAR(100) NOT NULL,
+    ESTADO VARCHAR(20) NOT NULL,
+    PRECO DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    CD_FUNCIONARIO INT,
+    FOREIGN KEY (CD_FUNCIONARIO) REFERENCES FUNCIONARIO(CD_FUNCIONARIO)
+) AUTO_INCREMENT=1000;
+
+-- Tabela de Compras (Vendas)
+CREATE TABLE COMPRA (
+    CD_COMPRA INT AUTO_INCREMENT PRIMARY KEY,
+    DATA DATE NOT NULL,
+    HORA TIME NOT NULL,
+    CD_CLIENTE INT,
+    TOTAL DECIMAL(10,2) DEFAULT 0.00,
+    FOREIGN KEY (CD_CLIENTE) REFERENCES CLIENTE(CD_CLIENTE)
+);
+
+-- Tabela de Itens da Compra (Detalhes)
+CREATE TABLE COMPRA_LIVRO (
+    CD_COMPRA INT,
+    CD_LIVRO INT,
+    QUANTIDADE INT NOT NULL DEFAULT 1,
+    VALOR_UNITARIO DECIMAL(10,2) NOT NULL,
+    PRIMARY KEY (CD_COMPRA, CD_LIVRO),
+    FOREIGN KEY (CD_COMPRA) REFERENCES COMPRA(CD_COMPRA) ON DELETE CASCADE,
+    FOREIGN KEY (CD_LIVRO) REFERENCES LIVRO(CD_LIVRO)
+);
+
+-- 3. DADOS INICIAIS (SEED)
+
+-- Funcionários (Senha padrão: 1234 / Admin: admin)
+INSERT INTO FUNCIONARIO (NOME, CPF, FUNCAO, SENHA) VALUES 
+('Administrador', '00000000000', 'Gerente', 'admin'),
+('Vendedor Padrão', '11111111111', 'Vendedor', '1234');
+
+-- Clientes
+INSERT INTO CLIENTE (NOME, CPF, EMAIL, TELEFONE) VALUES 
+('Cliente Consumidor', '99988877700', 'cliente@teste.com', '11999998888'),
+('Maria Silva', '12345678900', 'maria@email.com', '21988887777');
+
+-- Livros (Amostra do Acervo)
+INSERT INTO LIVRO (TITULO, ANO, AUTOR, ESTADO, PRECO, CD_FUNCIONARIO) VALUES 
+('Dom Casmurro', 1998, 'Machado de Assis', 'Usado', 34.90, 1),
+('O Senhor dos Anéis', 2019, 'J.R.R. Tolkien', 'Novo', 69.90, 1),
+('Clean Code', 2012, 'Robert C. Martin', 'Novo', 98.00, 1),
+('A Hora da Estrela', 1998, 'Clarice Lispector', 'Bom', 32.00, 1),
+('1984', 2009, 'George Orwell', 'Seminovo', 49.90, 1),
+('O Pequeno Príncipe', 2015, 'Antoine de Saint-Exupéry', 'Novo', 22.00, 1),
+('Harry Potter e a Pedra Filosofal', 2001, 'J.K. Rowling', 'Usado', 35.00, 1),
+('Vidas Secas', 1985, 'Graciliano Ramos', 'Velho', 15.00, 1),
+('O Código Da Vinci', 2004, 'Dan Brown', 'Seminovo', 28.00, 1),
+('It: A Coisa', 2014, 'Stephen King', 'Novo', 85.00, 1);
+
+COMMIT;
