@@ -7,13 +7,14 @@ session_start();
 
 // 1. SEGURANÇA DE LOGIN
 if (!isset($_SESSION['usuario_id'])) {
-    header("Location: ../../login.php");
+    // CORREÇÃO: Aponta para a nova localização do login (dentro de modulos)
+    header("Location: /sistema-sebo/modulos/login.php");
     exit;
 }
 
 // 2. SEGURANÇA DE NÍVEL (Só 'Gerente' pode excluir)
 // Se a função NÃO for Gerente, chuta de volta com erro
-if ($_SESSION['usuario_nivel'] !== 'Gerente') {
+if (!isset($_SESSION['usuario_nivel']) || $_SESSION['usuario_nivel'] !== 'Gerente') {
     // Redireciona com um parâmetro de erro na URL para mostrarmos um alerta
     header("Location: acervo.php?erro_perm=1");
     exit;

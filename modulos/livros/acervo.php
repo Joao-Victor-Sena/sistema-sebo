@@ -1,6 +1,7 @@
 <?php
 // modulos/livros/acervo.php
-require_once '../../config/conexao.php'; // Certifique-se que o arquivo na pasta config é 'conexao.php' (minúsculo)
+// Sobe 2 níveis para achar o config
+require_once '../../config/conexao.php';
 include '../../includes/header.php';
 
 // --- ALERTAS DE RETORNO ---
@@ -124,6 +125,7 @@ try {
 }
 ?>
 
+<!-- HEADER DA PÁGINA -->
 <div class="row mb-4 align-items-center">
     <div class="col-md-4">
         <h2 class="text-white display-6">
@@ -152,6 +154,7 @@ try {
     </div>
 </div>
 
+<!-- TABELA DE LIVROS -->
 <div class="card bg-dark border-secondary shadow">
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -188,9 +191,13 @@ try {
                                 
                                 <td class="text-end">
                                     <?php if (isset($_SESSION['usuario_nivel']) && $_SESSION['usuario_nivel'] === 'Gerente'): ?>
+                                        
+                                        <!-- Botão Editar -->
                                         <a href="editar.php?id=<?php echo $livro['CD_LIVRO']; ?>" class="btn btn-sm btn-outline-info me-1">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+                                        
+                                        <!-- Botão Excluir -->
                                         <button type="button" 
                                                 class="btn btn-sm btn-outline-danger" 
                                                 data-bs-toggle="modal" 
@@ -199,6 +206,7 @@ try {
                                                 data-titulo="<?php echo $livro['TITULO']; ?>">
                                             <i class="bi bi-trash"></i>
                                         </button>
+
                                     <?php else: ?>
                                         <span class="text-muted small"><i class="bi bi-lock-fill"></i></span>
                                     <?php endif; ?>
@@ -218,7 +226,8 @@ try {
     </div>
     
     <div class="card-footer bg-dark border-secondary d-flex justify-content-between align-items-center">
-        <small class="text-muted">
+        <!-- CORREÇÃO AQUI: Trocado text-muted por text-white-50 -->
+        <small class="text-white-50">
             Total: <strong><?php echo $total_registros; ?></strong> livros (Pág. <?php echo $pagina_atual; ?> de <?php echo $total_paginas; ?>)
         </small>
         
@@ -248,6 +257,7 @@ try {
     </div>
 </div>
 
+<!-- MODAL NOVO LIVRO -->
 <div class="modal fade" id="modalNovoLivro" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-white border-secondary shadow-lg">
@@ -258,26 +268,26 @@ try {
             <form method="POST" action="">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label text-muted small">Título da Obra</label>
+                        <label class="form-label text-white-50 small">Título da Obra</label>
                         <input type="text" class="form-control" name="titulo" required placeholder="Ex: Dom Casmurro">
                     </div>
                     <div class="row">
                         <div class="col-md-7 mb-3">
-                            <label class="form-label text-muted small">Autor</label>
+                            <label class="form-label text-white-50 small">Autor</label>
                             <input type="text" class="form-control" name="autor" required placeholder="Ex: Machado de Assis">
                         </div>
                         <div class="col-md-5 mb-3">
-                            <label class="form-label text-muted small">Ano Edição</label>
+                            <label class="form-label text-white-50 small">Ano Edição</label>
                             <input type="number" class="form-control" name="ano" required max="<?php echo date('Y'); ?>" placeholder="Máx: <?php echo date('Y'); ?>">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label text-muted small">Preço (R$)</label>
+                            <label class="form-label text-white-50 small">Preço (R$)</label>
                             <input type="number" class="form-control" name="preco" min="0" step="0.01" required placeholder="0.00">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label text-muted small">Condição</label>
+                            <label class="form-label text-white-50 small">Condição</label>
                             <select class="form-control form-select bg-dark text-white border-secondary" name="estado">
                                 <option value="Novo">Novo</option>
                                 <option value="Seminovo" selected>Seminovo</option>
@@ -296,6 +306,7 @@ try {
     </div>
 </div>
 
+<!-- MODAL EXCLUIR -->
 <div class="modal fade" id="modalExcluir" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-white border-danger shadow-lg">
@@ -306,7 +317,7 @@ try {
             <div class="modal-body text-center py-4">
                 <p class="mb-1">Você tem certeza que deseja remover este livro?</p>
                 <h4 id="nomeLivroExcluir" class="text-white fw-bold mt-3">...</h4>
-                <p class="text-muted small mt-2">Esta ação é irreversível.</p>
+                <p class="text-white-50 small mt-2">Esta ação é irreversível.</p>
             </div>
             <div class="modal-footer border-secondary justify-content-center">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -316,6 +327,7 @@ try {
     </div>
 </div>
 
+<!-- SCRIPT JS PARA MODAL EXCLUIR -->
 <script>
     const modalExcluir = document.getElementById('modalExcluir')
     if (modalExcluir) {
@@ -325,7 +337,7 @@ try {
             const titulo = button.getAttribute('data-titulo')
             
             modalExcluir.querySelector('#nomeLivroExcluir').textContent = titulo
-            // CORREÇÃO AQUI: Caminho absoluto para evitar erro 404
+            // CAMINHO ABSOLUTO CORRETO PARA A NOVA PASTA
             modalExcluir.querySelector('#btnConfirmarExclusao').href = '/sistema-sebo/modulos/livros/excluir.php?id=' + id
         })
     }

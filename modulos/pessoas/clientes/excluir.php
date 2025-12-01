@@ -5,12 +5,13 @@ session_start();
 
 // 1. Verifica Login
 if (!isset($_SESSION['usuario_id'])) {
-    header("Location: ../../login.php");
+    // CORREÇÃO: Aponta para a nova pasta 'modulos'
+    header("Location: /sistema-sebo/modulos/login.php");
     exit;
 }
 
 // 2. Verifica Permissão (Gerente)
-if ($_SESSION['usuario_nivel'] !== 'Gerente') {
+if (!isset($_SESSION['usuario_nivel']) || $_SESSION['usuario_nivel'] !== 'Gerente') {
     header("Location: cliente.php?erro_perm=1");
     exit;
 }

@@ -1,7 +1,7 @@
 <?php
 // pessoas/clientes/cliente.php
-require_once '../../config/conexao.php';
-include '../../includes/header.php';
+require_once '../../../config/conexao.php';
+include '../../../includes/header.php';
 
 // --- ALERTAS DE RETORNO ---
 if (isset($_GET['msg']) && $_GET['msg'] == 'excluido') {
@@ -22,7 +22,7 @@ if (isset($_GET['erro_db'])) {
             <i class='bi bi-exclamation-triangle'></i> Não foi possível excluir: Cliente possui histórico de compras.
             <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
           </div>";
-} // <--- AQUI ESTAVA FALTANDO ESTA CHAVE!
+} // <--- CORREÇÃO: ADICIONADA A CHAVE QUE FALTAVA
 
 // --- LÓGICA DE CADASTRO (Novo Cliente) ---
 if (isset($_POST['btn_cadastrar'])) {
@@ -136,7 +136,7 @@ try {
         </form>
     </div>
     <div class="col-md-4 text-end">
-        <a href="../../index.php" class="btn btn-outline-light me-2"><i class="bi bi-arrow-left"></i> Voltar</a>
+            <a href="../../../index.php" class="btn btn-outline-light me-2"><i class="bi bi-arrow-left"></i> Voltar</a>
         <button type="button" class="btn bg-orange fw-bold" data-bs-toggle="modal" data-bs-target="#modalNovoCliente">
             <i class="bi bi-person-plus-fill"></i> Novo
         </button>
@@ -307,4 +307,4 @@ try {
     }
 </script>
 
-<?php include '../../includes/footer.php'; ?>
+<?php include '../../../includes/footer.php'; ?>

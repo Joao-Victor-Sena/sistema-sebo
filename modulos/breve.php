@@ -1,7 +1,11 @@
 <?php
-// breve.php
-require_once 'config/conexao.php';
-include 'includes/header.php';
+// modulos/breve.php
+
+// CORREÇÃO: Sobe 1 nível para achar a config
+require_once '../config/conexao.php';
+
+// CORREÇÃO: Sobe 1 nível para achar o header
+include '../includes/header.php';
 ?>
 
 <div class="d-flex flex-column justify-content-center align-items-center text-center" style="min-height: 70vh;">
@@ -29,4 +33,7 @@ include 'includes/header.php';
 
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<?php 
+// CORREÇÃO: Sobe 1 nível para achar o footer
+include '../includes/footer.php'; 
+?>
