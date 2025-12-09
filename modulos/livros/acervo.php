@@ -1,96 +1,60 @@
 <?php
-// modulos/livros/acervo.php
-// Sobe 2 níveis para achar o config
+session_start();
 require_once '../../config/conexao.php';
-include '../../includes/header.php';
 
-// --- ALERTAS DE RETORNO ---
-if (isset($_GET['msg']) && $_GET['msg'] == 'excluido') {
-    echo "<div class='alert alert-success fixed-top m-3 shadow' style='z-index:2000;'>
-            <i class='bi bi-check-circle-fill'></i> Livro excluído com sucesso!
-            <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
-          </div>";
-}
-if (isset($_GET['msg']) && $_GET['msg'] == 'atualizado') {
-    echo "<div class='alert alert-success fixed-top m-3 shadow' style='z-index:2000;'>
-            <i class='bi bi-pencil-fill'></i> Livro atualizado com sucesso!
-            <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
-          </div>";
-}
-if (isset($_GET['erro_perm'])) {
-    echo "<div class='alert alert-danger fixed-top m-3 shadow' style='z-index:2000;'>
-            <i class='bi bi-shield-lock-fill'></i> <strong>Acesso Negado:</strong> Somente Gerentes podem editar ou excluir.
-            <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
-          </div>";
-}
-if (isset($_GET['erro_db'])) {
-    echo "<div class='alert alert-warning fixed-top m-3 shadow' style='z-index:2000;'>
-            <i class='bi bi-exclamation-triangle'></i> Não foi possível excluir: Este livro pode estar vinculado a uma venda.
-            <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
-          </div>";
-}
+$niveis_admin = ['Gerente', 'Admin', 'Administrador'];
 
-// --- LÓGICA DE CADASTRO (Novo Livro) ---
 if (isset($_POST['btn_cadastrar'])) {
+
+    if (!isset($_SESSION['usuario_id'])) {
+        header("Location: ../../index.php?erro=login");
+        exit;
+    }
+
     $titulo = filter_input(INPUT_POST, 'titulo', FILTER_SANITIZE_SPECIAL_CHARS);
     $autor  = filter_input(INPUT_POST, 'autor', FILTER_SANITIZE_SPECIAL_CHARS);
     $ano    = filter_input(INPUT_POST, 'ano', FILTER_VALIDATE_INT);
     $preco  = str_replace(',', '.', $_POST['preco']); 
     $estado = filter_input(INPUT_POST, 'estado', FILTER_SANITIZE_SPECIAL_CHARS);
     $func_id = $_SESSION['usuario_id'];
-
-    // --- VALIDAÇÃO DE DADOS ---
     $ano_atual = date('Y');
     
     if ($ano > $ano_atual) {
-        echo "<div class='alert alert-warning fixed-top m-3' style='z-index: 2000;'>
-                <i class='bi bi-exclamation-triangle'></i> Erro: Ano futuro não permitido.
-                <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
-              </div>";
+        $erro_msg = "Erro: Ano futuro não permitido.";
     } elseif ($preco < 0) {
-        echo "<div class='alert alert-warning fixed-top m-3' style='z-index: 2000;'>
-                <i class='bi bi-cash-coin'></i> Erro: Preço negativo.
-                <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
-              </div>";
+        $erro_msg = "Erro: Preço negativo.";
     } else {
         try {
-            $sql_insert = "INSERT INTO LIVRO (TITULO, AUTOR, ANO, PRECO, ESTADO, CD_FUNCIONARIO) 
-                           VALUES (:titulo, :autor, :ano, :preco, :estado, :func_id)";
-            $stmt_insert = $pdo->prepare($sql_insert);
-            $stmt_insert->bindValue(':titulo', $titulo);
-            $stmt_insert->bindValue(':autor', $autor);
-            $stmt_insert->bindValue(':ano', $ano);
-            $stmt_insert->bindValue(':preco', $preco);
-            $stmt_insert->bindValue(':estado', $estado);
-            $stmt_insert->bindValue(':func_id', $func_id);
-            
-            $stmt_insert->execute();
-            echo "<script>window.location='acervo.php';</script>";
+            $sql = "INSERT INTO LIVRO (TITULO, AUTOR, ANO, PRECO, ESTADO, CD_FUNCIONARIO) VALUES (:titulo, :autor, :ano, :preco, :estado, :func_id)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':titulo' => $titulo,
+                ':autor' => $autor,
+                ':ano' => $ano,
+                ':preco' => $preco,
+                ':estado' => $estado,
+                ':func_id' => $func_id
+            ]);
+            echo "<script>window.location='acervo.php?msg=cadastrado';</script>";
             exit;
-
         } catch (PDOException $e) {
-            echo "<div class='alert alert-danger'>Erro ao cadastrar: " . $e->getMessage() . "</div>";
+            $erro_msg = "Erro ao cadastrar: " . $e->getMessage();
         }
     }
 }
 
-// --- CONFIGURAÇÃO DA PAGINAÇÃO ---
 $itens_por_pagina = 15;
 $pagina_atual = filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT) ?? 1;
-if (!$pagina_atual || $pagina_atual < 1) { $pagina_atual = 1; }
+if ($pagina_atual < 1) $pagina_atual = 1;
 
-// --- LÓGICA DE BUSCA ---
 $busca = filter_input(INPUT_GET, 'busca', FILTER_SANITIZE_SPECIAL_CHARS);
 $termo = "%" . $busca . "%";
 
 try {
     if (!empty($busca)) {
-        $sql_count = "SELECT COUNT(*) as total FROM LIVRO 
-                      WHERE CD_LIVRO LIKE :t1 OR TITULO LIKE :t2 OR AUTOR LIKE :t3 OR ESTADO LIKE :t4 OR ANO LIKE :t5";
+        $sql_count = "SELECT COUNT(*) as total FROM LIVRO WHERE CD_LIVRO LIKE :t OR TITULO LIKE :t OR AUTOR LIKE :t OR ESTADO LIKE :t OR ANO LIKE :t";
         $stmt_count = $pdo->prepare($sql_count);
-        $stmt_count->bindValue(':t1', $termo); $stmt_count->bindValue(':t2', $termo);
-        $stmt_count->bindValue(':t3', $termo); $stmt_count->bindValue(':t4', $termo);
-        $stmt_count->bindValue(':t5', $termo);
+        $stmt_count->bindValue(':t', $termo);
     } else {
         $sql_count = "SELECT COUNT(*) as total FROM LIVRO";
         $stmt_count = $pdo->prepare($sql_count);
@@ -98,34 +62,55 @@ try {
     $stmt_count->execute();
     $total_registros = $stmt_count->fetch()['total'];
     $total_paginas = ceil($total_registros / $itens_por_pagina);
-
     $offset = ($pagina_atual - 1) * $itens_por_pagina;
 
     if (!empty($busca)) {
-        $sql = "SELECT * FROM LIVRO 
-                WHERE CD_LIVRO LIKE :t1 OR TITULO LIKE :t2 OR AUTOR LIKE :t3 OR ESTADO LIKE :t4 OR ANO LIKE :t5
-                ORDER BY TITULO ASC LIMIT :limite OFFSET :offset";
+        $sql = "SELECT * FROM LIVRO WHERE CD_LIVRO LIKE :t OR TITULO LIKE :t OR AUTOR LIKE :t OR ESTADO LIKE :t OR ANO LIKE :t ORDER BY TITULO ASC LIMIT :lim OFFSET :off";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':t1', $termo); $stmt->bindValue(':t2', $termo);
-        $stmt->bindValue(':t3', $termo); $stmt->bindValue(':t4', $termo);
-        $stmt->bindValue(':t5', $termo);
+        $stmt->bindValue(':t', $termo);
     } else {
-        $sql = "SELECT * FROM LIVRO ORDER BY CD_LIVRO DESC LIMIT :limite OFFSET :offset";
+        $sql = "SELECT * FROM LIVRO ORDER BY CD_LIVRO DESC LIMIT :lim OFFSET :off";
         $stmt = $pdo->prepare($sql);
     }
-
-    $stmt->bindValue(':limite', $itens_por_pagina, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->bindValue(':lim', $itens_por_pagina, PDO::PARAM_INT);
+    $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $livros = $stmt->fetchAll();
-
 } catch (PDOException $e) {
     $livros = [];
-    echo "<div class='alert alert-danger'>Erro no sistema: " . $e->getMessage() . "</div>";
+    $erro_msg = "Erro no sistema: " . $e->getMessage();
 }
+
+include '../../includes/header.php';
 ?>
 
-<!-- HEADER DA PÁGINA -->
+<?php if (isset($_GET['msg'])): ?>
+    <div class='alert alert-success fixed-top m-3 shadow' style='z-index:2000;'>
+        <?php if($_GET['msg'] == 'excluido'): ?>
+            <i class='bi bi-check-circle-fill'></i> Livro excluído com sucesso!
+        <?php elseif($_GET['msg'] == 'atualizado'): ?>
+            <i class='bi bi-pencil-fill'></i> Livro atualizado com sucesso!
+        <?php elseif($_GET['msg'] == 'cadastrado'): ?>
+            <i class='bi bi-check-lg'></i> Livro cadastrado com sucesso!
+        <?php endif; ?>
+        <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($_GET['erro_perm'])): ?>
+    <div class='alert alert-danger fixed-top m-3 shadow' style='z-index:2000;'>
+        <i class='bi bi-shield-lock-fill'></i> <strong>Acesso Negado:</strong> Somente Gerentes ou Administradores podem realizar esta ação.
+        <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($erro_msg)): ?>
+    <div class='alert alert-warning fixed-top m-3 shadow' style='z-index:2000;'>
+        <i class='bi bi-exclamation-triangle'></i> <?= $erro_msg ?>
+        <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
+    </div>
+<?php endif; ?>
+
 <div class="row mb-4 align-items-center">
     <div class="col-md-4">
         <h2 class="text-white display-6">
@@ -135,8 +120,7 @@ try {
     <div class="col-md-4">
         <form method="GET" action="" class="d-flex">
             <div class="input-group">
-                <input type="text" name="busca" class="form-control bg-dark text-white border-secondary" 
-                       placeholder="Pesquisar..." value="<?php echo $busca; ?>">
+                <input type="text" name="busca" class="form-control bg-dark text-white border-secondary" placeholder="Pesquisar..." value="<?= $busca; ?>">
                 <button class="btn btn-outline-orange" type="submit">
                     <i class="bi bi-search"></i>
                 </button>
@@ -148,13 +132,15 @@ try {
     </div>
     <div class="col-md-4 text-end">
         <a href="../../index.php" class="btn btn-outline-light me-2"><i class="bi bi-arrow-left"></i> Voltar</a>
-        <button type="button" class="btn bg-orange fw-bold" data-bs-toggle="modal" data-bs-target="#modalNovoLivro">
-            <i class="bi bi-plus-lg"></i> Novo
-        </button>
+        
+        <?php if (isset($_SESSION['usuario_id'])): ?>
+            <button type="button" class="btn bg-orange fw-bold" data-bs-toggle="modal" data-bs-target="#modalNovoLivro">
+                <i class="bi bi-plus-lg"></i> Novo
+            </button>
+        <?php endif; ?>
     </div>
 </div>
 
-<!-- TABELA DE LIVROS -->
 <div class="card bg-dark border-secondary shadow">
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -172,44 +158,39 @@ try {
                 </thead>
                 <tbody>
                     <?php if (count($livros) > 0): ?>
-                        <?php foreach ($livros as $livro): ?>
+                        <?php 
+                        $cores_estado = [
+                            'Novo' => 'bg-success',
+                            'Seminovo' => 'bg-primary',
+                            'Usado' => 'bg-warning text-dark',
+                            'Velho' => 'bg-danger'
+                        ];
+
+                        foreach ($livros as $livro): 
+                            $badge_cor = $cores_estado[$livro['ESTADO']] ?? 'bg-secondary';
+                        ?>
                             <tr>
-                                <td><small class="text-white small">#<?php echo $livro['CD_LIVRO']; ?></small></td>
-                                <td class="fw-bold text-white"><?php echo $livro['TITULO']; ?></td>
-                                <td class="text-light"><?php echo $livro['AUTOR']; ?></td>
-                                <td class="text-light"><?php echo $livro['ANO']; ?></td>
-                                <td class="text-success fw-bold">R$ <?php echo number_format($livro['PRECO'], 2, ',', '.'); ?></td>
-                                <td>
-                                    <?php 
-                                        $cor = 'bg-secondary';
-                                        if($livro['ESTADO'] == 'Novo') $cor = 'bg-success';
-                                        if($livro['ESTADO'] == 'Usado') $cor = 'bg-warning text-dark';
-                                        if($livro['ESTADO'] == 'Velho') $cor = 'bg-danger';
-                                    ?>
-                                    <span class="badge <?php echo $cor; ?>"><?php echo $livro['ESTADO']; ?></span>
-                                </td>
-                                
+                                <td><small class="text-white small">#<?= $livro['CD_LIVRO']; ?></small></td>
+                                <td class="fw-bold text-white"><?= $livro['TITULO']; ?></td>
+                                <td class="text-light"><?= $livro['AUTOR']; ?></td>
+                                <td class="text-light"><?= $livro['ANO']; ?></td>
+                                <td class="text-success fw-bold">R$ <?= number_format($livro['PRECO'], 2, ',', '.'); ?></td>
+                                <td><span class="badge <?= $badge_cor; ?>"><?= $livro['ESTADO']; ?></span></td>
                                 <td class="text-end">
-                                    <?php if (isset($_SESSION['usuario_nivel']) && $_SESSION['usuario_nivel'] === 'Gerente'): ?>
-                                        
-                                        <!-- Botão Editar -->
-                                        <a href="editar.php?id=<?php echo $livro['CD_LIVRO']; ?>" class="btn btn-sm btn-outline-info me-1">
+                                    
+                                    <?php 
+                                    if (isset($_SESSION['usuario_nivel']) && in_array($_SESSION['usuario_nivel'], $niveis_admin)): 
+                                    ?>
+                                        <a href="editar.php?id=<?= $livro['CD_LIVRO']; ?>" class="btn btn-sm btn-outline-info me-1">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        
-                                        <!-- Botão Excluir -->
-                                        <button type="button" 
-                                                class="btn btn-sm btn-outline-danger" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#modalExcluir"
-                                                data-id="<?php echo $livro['CD_LIVRO']; ?>"
-                                                data-titulo="<?php echo $livro['TITULO']; ?>">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalExcluir" data-id="<?= $livro['CD_LIVRO']; ?>" data-titulo="<?= $livro['TITULO']; ?>">
                                             <i class="bi bi-trash"></i>
                                         </button>
-
                                     <?php else: ?>
-                                        <span class="text-muted small"><i class="bi bi-lock-fill"></i></span>
+                                        <span class="text-muted small" title="Apenas Admin pode alterar"><i class="bi bi-lock-fill"></i></span>
                                     <?php endif; ?>
+
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -226,30 +207,29 @@ try {
     </div>
     
     <div class="card-footer bg-dark border-secondary d-flex justify-content-between align-items-center">
-        <!-- CORREÇÃO AQUI: Trocado text-muted por text-white-50 -->
         <small class="text-white-50">
-            Total: <strong><?php echo $total_registros; ?></strong> livros (Pág. <?php echo $pagina_atual; ?> de <?php echo $total_paginas; ?>)
+            Total: <strong><?= $total_registros; ?></strong> livros (Pág. <?= $pagina_atual; ?> de <?= $total_paginas > 0 ? $total_paginas : 1; ?>)
         </small>
         
         <?php if ($total_paginas > 1): ?>
         <nav aria-label="Navegação">
             <ul class="pagination pagination-sm mb-0">
-                <li class="page-item <?php echo ($pagina_atual <= 1) ? 'disabled' : ''; ?>">
-                    <a class="page-link" href="?pagina=<?php echo $pagina_atual - 1; ?>&busca=<?php echo $busca; ?>"><i class="bi bi-chevron-left"></i></a>
+                <li class="page-item <?= ($pagina_atual <= 1) ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?pagina=<?= $pagina_atual - 1; ?>&busca=<?= $busca; ?>"><i class="bi bi-chevron-left"></i></a>
                 </li>
                 <?php 
                 $inicio = max(1, $pagina_atual - 2);
                 $fim = min($total_paginas, $pagina_atual + 2);
-                if($inicio > 1) { echo '<li class="page-item disabled"><span class="page-link">...</span></li>'; }
+                if($inicio > 1) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
                 for ($i = $inicio; $i <= $fim; $i++): 
                 ?>
-                    <li class="page-item <?php echo ($pagina_atual == $i) ? 'active' : ''; ?>">
-                        <a class="page-link" href="?pagina=<?php echo $i; ?>&busca=<?php echo $busca; ?>"><?php echo $i; ?></a>
+                    <li class="page-item <?= ($pagina_atual == $i) ? 'active' : ''; ?>">
+                        <a class="page-link" href="?pagina=<?= $i; ?>&busca=<?= $busca; ?>"><?= $i; ?></a>
                     </li>
                 <?php endfor; ?>
-                <?php if($fim < $total_paginas) { echo '<li class="page-item disabled"><span class="page-link">...</span></li>'; } ?>
-                <li class="page-item <?php echo ($pagina_atual >= $total_paginas) ? 'disabled' : ''; ?>">
-                    <a class="page-link" href="?pagina=<?php echo $pagina_atual + 1; ?>&busca=<?php echo $busca; ?>"><i class="bi bi-chevron-right"></i></a>
+                <?php if($fim < $total_paginas) echo '<li class="page-item disabled"><span class="page-link">...</span></li>'; ?>
+                <li class="page-item <?= ($pagina_atual >= $total_paginas) ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?pagina=<?= $pagina_atual + 1; ?>&busca=<?= $busca; ?>"><i class="bi bi-chevron-right"></i></a>
                 </li>
             </ul>
         </nav>
@@ -257,7 +237,6 @@ try {
     </div>
 </div>
 
-<!-- MODAL NOVO LIVRO -->
 <div class="modal fade" id="modalNovoLivro" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-white border-secondary shadow-lg">
@@ -278,7 +257,7 @@ try {
                         </div>
                         <div class="col-md-5 mb-3">
                             <label class="form-label text-white-50 small">Ano Edição</label>
-                            <input type="number" class="form-control" name="ano" required max="<?php echo date('Y'); ?>" placeholder="Máx: <?php echo date('Y'); ?>">
+                            <input type="number" class="form-control" name="ano" required max="<?= date('Y'); ?>" placeholder="Máx: <?= date('Y'); ?>">
                         </div>
                     </div>
                     <div class="row">
@@ -306,7 +285,6 @@ try {
     </div>
 </div>
 
-<!-- MODAL EXCLUIR -->
 <div class="modal fade" id="modalExcluir" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-white border-danger shadow-lg">
@@ -327,7 +305,6 @@ try {
     </div>
 </div>
 
-<!-- SCRIPT JS PARA MODAL EXCLUIR -->
 <script>
     const modalExcluir = document.getElementById('modalExcluir')
     if (modalExcluir) {
@@ -337,8 +314,7 @@ try {
             const titulo = button.getAttribute('data-titulo')
             
             modalExcluir.querySelector('#nomeLivroExcluir').textContent = titulo
-            // CAMINHO ABSOLUTO CORRETO PARA A NOVA PASTA
-            modalExcluir.querySelector('#btnConfirmarExclusao').href = '/sistema-sebo/modulos/livros/excluir.php?id=' + id
+            modalExcluir.querySelector('#btnConfirmarExclusao').href = 'excluir.php?id=' + id
         })
     }
 </script>

@@ -1,19 +1,12 @@
 <?php
-// modulos/login.php
 session_start();
-
-// CORREÇÃO 1: Sobe 1 nível para achar a config
 require_once '../config/conexao.php';
 
-// Lógica de Login (Back-end)
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $cpf = $_POST['cpf'];
+    $cpf = preg_replace('/[^0-9]/', '', $_POST['cpf']);
     $senha = $_POST['senha'];
-
-    // Limpa o CPF
-    $cpf = preg_replace('/[^0-9]/', '', $cpf);
 
     try {
         $sql = "SELECT * FROM FUNCIONARIO WHERE CPF = :cpf AND SENHA = :senha";
@@ -24,20 +17,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($stmt->rowCount() > 0) {
             $usuario = $stmt->fetch();
-            
-            // Cria a sessão
             $_SESSION['usuario_id'] = $usuario['CD_FUNCIONARIO'];
             $_SESSION['usuario_nome'] = $usuario['NOME'];
             $_SESSION['usuario_nivel'] = $usuario['FUNCAO'];
 
-            // CORREÇÃO 2: Redireciona para a raiz (sobe 1 nível)
             header("Location: ../index.php");
             exit;
         } else {
             $erro = "CPF ou Senha incorretos!";
         }
     } catch (PDOException $e) {
-        $erro = "Erro no banco: " . $e->getMessage();
+        $erro = "Erro ao tentar realizar o login.";
     }
 }
 ?>
@@ -47,11 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sebo Integrador</title>
+    <title>Login - SeboLinhas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- CORREÇÃO 3: Caminho absoluto para o CSS funcionar dentro da pasta modulos -->
-    <link rel="stylesheet" href="/sistema-sebo/css/custom.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../css/custom.css">
 </head>
 <body class="login-page">
 
@@ -85,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
             
             <div class="text-center mt-3">
-                <a href="#" class="text-muted small">Esqueceu a senha?</a>
+                <a href="esqueceu.php" class="text-white small text-decoration-none">Esqueceu a senha?</a>
             </div>
         </form>
     </div>
