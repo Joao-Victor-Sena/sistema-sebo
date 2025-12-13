@@ -3,6 +3,7 @@ require_once 'config/conexao.php';
 include 'includes/header.php';
 ?>
 
+
 <a href="modulos/logout.php" class="btn btn-outline-danger btn-sm btn-logout-floating">
     <i class="bi bi-box-arrow-right"></i> Sair
 </a>

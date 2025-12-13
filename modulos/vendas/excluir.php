@@ -14,4 +14,5 @@ if ($id) {
     $pdo->prepare("DELETE FROM COMPRA WHERE CD_COMPRA = :id")->execute([':id' => $id]);
 }
 
+
 header("Location: vendas.php");

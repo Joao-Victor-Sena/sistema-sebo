@@ -1,6 +1,4 @@
-/* =========================================
-   1. VARIÁVEIS E GLOBAIS
-   ========================================= */
+/*1. VARIÁVEIS E GLOBAIS*/
 :root {
     --primary-color: #ff8c00;
     --primary-hover: #e67e22;
@@ -23,9 +21,7 @@ body {
 .text-orange { color: var(--primary-color) !important; }
 .bg-orange { background-color: var(--primary-color) !important; color: #000; }
 
-/* =========================================
-   2. NAVBAR E FOOTER
-   ========================================= */
+/*2. NAVBAR E FOOTER*/
 .navbar-dark.bg-dark {
     background-color: #000 !important;
     border-bottom: 2px solid var(--primary-color);
@@ -40,9 +36,7 @@ body {
     margin-top: auto;
 }
 
-/* =========================================
-   3. BOTÕES E PAGINAÇÃO
-   ========================================= */
+/*3. BOTÕES E PAGINAÇÃO*/
 .btn-outline-orange {
     color: var(--primary-color);
     border-color: var(--primary-color);
@@ -63,7 +57,7 @@ body {
     z-index: 1000;
 }
 
-/* Paginação */
+/*4. PAGINAÇÃO*/
 .pagination .page-link {
     background-color: var(--bg-card);
     border-color: var(--border-color);
@@ -89,9 +83,7 @@ body {
     border-color: #333;
 }
 
-/* =========================================
-   4. FORMULÁRIOS (INPUTS)
-   ========================================= */
+/*5. FORMULÁRIOS*/
 .form-control, 
 .form-select {
     color: #fff !important;
@@ -118,9 +110,7 @@ body {
     opacity: 0.7;
 }
 
-/* =========================================
-   5. PÁGINA DE LOGIN
-   ========================================= */
+/*6. PÁGINA DE LOGIN*/
 .login-page {
     position: relative;
     height: 100vh;
@@ -130,7 +120,7 @@ body {
     overflow: hidden;
 }
 
-/* Card de Login */
+/*7. CARD DE LOGIN*/
 .card-login {
     width: 100%;
     max-width: 400px;
@@ -180,9 +170,7 @@ body {
     text-decoration: underline;
 }
 
-/* =========================================
-   6. DASHBOARD E COMPONENTES EXTRAS
-   ========================================= */
+/*8. DASHBOARD E COMPONENTES EXTRAS*/
 .card-menu {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -228,7 +216,7 @@ body {
     color: rgba(255,255,255,0.7) !important;
 }
 
-/* Modais */
+/*9. MODAIS*/
 .modal-content {
     background-color: #222;
     color: #fff;
